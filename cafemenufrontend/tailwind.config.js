@@ -5,7 +5,7 @@ export default {
     extend: {
       colors:{
         primaryWhite:'#ffffff',
-        secondaryWhite:'#f2f2f2',
+        secondaryWhite:'#f3f3f3',
         primaryBlack:'#0d0d0d',
         secondaryBlack:'#262626',
         primaryMain:'#004d99',
@@ -19,5 +19,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar-hide')],
 };

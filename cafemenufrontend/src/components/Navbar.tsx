@@ -1,19 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
-
 import { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Logo } from '../types';
+import { Category, Logo } from '../types';
 
 const Navbar = () => {
     const location = useLocation();
-    const isAdmin = location.pathname.startsWith('/admin');
+    const [loading, setLoading] = useState(true);
     const [logo, setLogo] = useState<Logo | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         const fetchLogo = async () => {
             try {
                 const response = await api.getLogos();
-                // Birden fazla logo varsa, ilkini kullanıyoruz
                 if (response.data && response.data.length > 0) {
                     setLogo(response.data[0]);
                 }
@@ -24,37 +23,33 @@ const Navbar = () => {
         fetchLogo();
     }, []);
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await api.getCategories();
+                setCategories(response.data.sort((a, b) => a.categoryOrder - b.categoryOrder));
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <div>
-            <div className='px-4 py-2 flex flex-row justify-between container mx-auto bg-primaryWhite'>
-                <div>Bize Yazın!</div>
-                <div>Takip edin</div>
+            {/* Navbar */}
+            <div className='container flex mx-auto px-4 py-4  bg-secondaryWhite border-b border-neutral-200'>
+                {logo && logo.logoUrl ? (
+                    <img className='w-10 rounded-full' src={logo.logoUrl} alt="Logo" />
+                ) : (
+                    <span className='text-secondaryBlack text-xl font-bold'>Logo</span>
+                )}
             </div>
-            <nav className=" bg-gradient-to-r from-primaryMain to-secondaryMain antialiased">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link to="/" className="flex items-center space-x-2 ">
-                            {logo && logo.logoUrl ? (
-                                <img className='w-20 rounded-full' src={logo.logoUrl} alt="Logo" />
-                            ) : (
-                                <span className='text-white text-xl font-bold'>Logo</span>
-                            )}
-                        </Link>
-                        <Link
-                            to={isAdmin ? '/' : '/admin'}
-                            className="flex items-center space-x-1 text-white hover:text-amber-600"
-                        >
-                            {isAdmin ? (
-                                <span>Menüyü göster</span>
-                            ) : (
-                                <>
-                                    
-                                </>
-                            )}
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+
+           
         </div>
     );
 };

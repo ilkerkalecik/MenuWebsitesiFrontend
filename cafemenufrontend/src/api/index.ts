@@ -19,7 +19,7 @@ export const api = {
     },
 
     // Category endpoints
-    
+
     getCategories: () => axios.get<Category[]>(`${API_URL}/category`),
     addCategory: (name: string) => axios.post(`${API_URL}/category`, { name }),
     updateCategory: (id: number, name: string) => axios.put(`${API_URL}/category/${id}`, { name }),
@@ -27,6 +27,9 @@ export const api = {
 
     // Product endpoints
     getProducts: () => axios.get<Product[]>(`${API_URL}/product`),
+    // Tek bir ürünü ID'ye göre getir
+    getProductById: (id:  number) => axios.get<Product>(`${API_URL}/product/${id}`),
+
     addProduct: (product: CreateProductDto) => axios.post(`${API_URL}/product`, product),
     updateProduct: (id: number, product: Partial<CreateProductDto>) =>
         axios.put(`${API_URL}/product/${id}`, product),
@@ -53,13 +56,13 @@ export const api = {
         return response.data;
     },
     // frontend tarafında updateCategoryOrder fonksiyonunuzu güncelleyin
-      updateCategoryOrder: (categories: { id: number; order: number }[]) =>
+    updateCategoryOrder: (categories: { id: number; order: number }[]) =>
         axios.put(`${API_URL}/category/order`, { categories: categories }),
 
-      getLogos: () => axios.get(`${API_URL}/logo`),
-      addLogo: (logoUrl: string) => axios.post(`${API_URL}/logo`, { logoUrl }),
-      updateLogo: (id: number, logoUrl: string) => axios.put(`${API_URL}/logo/${id}`, { logoUrl }),
-      deleteLogo: (id: number) => axios.delete(`${API_URL}/logo/${id}`),
+    getLogos: () => axios.get(`${API_URL}/logo`),
+    addLogo: (logoUrl: string) => axios.post(`${API_URL}/logo`, { logoUrl }),
+    updateLogo: (id: number, logoUrl: string) => axios.put(`${API_URL}/logo/${id}`, { logoUrl }),
+    deleteLogo: (id: number) => axios.delete(`${API_URL}/logo/${id}`),
 
 };
 

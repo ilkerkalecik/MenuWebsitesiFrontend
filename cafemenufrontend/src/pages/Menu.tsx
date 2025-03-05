@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Category } from '../types/index.ts';
+import { Category, Logo } from '../types/index.ts';
 import { api } from '../api';
 import { Coffee, Dessert, EggFried, FishSymbol, GlassWater, Heart, IceCream, Pizza, Utensils, Vegan, Wine } from 'lucide-react';
+import ProductModal from './ProductModal.tsx';
 
 const getCategoryIcon = (kategoriAdi: string) => {
     const lowerKategori = kategoriAdi.toLocaleLowerCase("tr");
@@ -26,8 +27,10 @@ const getCategoryIcon = (kategoriAdi: string) => {
 const Menu = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
-    const [expandedDescriptions, setExpandedDescriptions] = useState<Record<number, boolean>>({});
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [modalProduct, setModalProduct] = useState(null); // Modal için gösterilecek ürünü tutacak state
+    const [isModalOpen, setIsModalOpen] = useState(false); // Modal'ın açık olup olmadığını kontrol etmek için durum
+    const [logo, setLogo] = useState<Logo | null>(null);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -44,6 +47,34 @@ const Menu = () => {
         fetchCategories();
     }, []);
 
+    const handleCategoryChange = (categoryName: string | null) => {
+        setSelectedCategory(categoryName);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        const fetchLogo = async () => {
+            try {
+                const response = await api.getLogos();
+                if (response.data && response.data.length > 0) {
+                    setLogo(response.data[0]);
+                }
+            } catch (error) {
+                console.error('Logo yüklenirken hata oluştu', error);
+            }
+        };
+        fetchLogo();
+    }, []);
+    const openModal = (product: any) => {
+        setModalProduct(product); // Ürün bilgilerini modal state'ine ekleyelim
+        setIsModalOpen(true); // Modal'ı açıyoruz
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false); // Modal'ı kapatıyoruz
+        setModalProduct(null); // Modal kapandığında ürünü sıfırlıyoruz
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -58,21 +89,23 @@ const Menu = () => {
 
     return (
         <div className="space-y-12">
+
+
             {/* Kategori Seçim Butonları */}
-            <div className="sticky top-0 bg-white py-3 z-10 overflow-x-auto flex gap-4 px-4 border border-gray-200   whitespace-nowrap ">
-                <button 
-                    onClick={() => setSelectedCategory(null)} 
-                    className={`px-4 py-2 rounded-full font-semibold transition-all ${!selectedCategory ? 'bg-gray-950 text-white' : 'bg-gray-100 text-dark'}`}
+            <div className="sticky top-0  py-4 z-10 overflow-x-auto flex gap-2 whitespace-nowrap bg-primaryWhite scrollbar-hide ">
+                <button
+                    onClick={() => setSelectedCategory(null)}
+                    className={`px-4 py-2 rounded-full font-light tracking-wide border border-neutral-100 transition-all ${!selectedCategory ? 'bg-neutral-900 text-neutral-200' : 'text-neutral-500 '}`}
                 >
                     Tüm Ürünler
                 </button>
                 {categories.map(category => {
                     const Icon = getCategoryIcon(category.name);
                     return (
-                        <button 
-                            key={category.id} 
-                            onClick={() => setSelectedCategory(category.name)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all ${selectedCategory === category.name ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-800'}`}
+                        <button
+                            key={category.id}
+                            onClick={() => handleCategoryChange(category.name)}
+                            className={`flex items-center capitalize gap-2 px-4 py-2 rounded-full font-light tracking-wide transition-all border border-neutral-100 ${selectedCategory === category.name ? 'bg-neutral-900 text-neutral-200' : ' text-neutral-500'}`}
                         >
                             <Icon className="h-5 w-5" />
                             <span className="whitespace-nowrap">{category.name}</span>
@@ -80,50 +113,38 @@ const Menu = () => {
                     );
                 })}
             </div>
-            
+
             {/* Ürünler Listesi */}
-            {filteredCategories.map((category) => {
-                const Icon = getCategoryIcon(category.name);
-                return (
-                    <div key={category.id} className="space-y-6">
-                        <div className="flex space-x-2 mb-10">
-                            <Icon className="h-8 w-8 text-black" />
-                            <h2 className="text-3xl font-lightest text-black antialiased tracking-normal">{category.name}</h2>
-                        </div>
-                        <div className="grid grid-cols md:grid-cols-3 lg:grid-cols-5 gap-3">
-                            {category.products.map((product) => {
-                                const isExpanded = expandedDescriptions[product.id] || false;
-                                return (
-                                    <div key={product.id} className="bg-primary rounded-lg overflow-hidden border border-black text-start flex sm:flex-col md:flex-col flex-grow">
-                                        <img src={product.imageUrl} alt={product.name} className="w-5/12 md:w-full object-cover rounded border border-black" />
-                                        <div className="px-4 py-6 flex flex-col space-y-1 flex-grow">
-                                            <h1 className='mb-4'>{category.name}</h1>
-                                            <h3 className="text-2xl font-bold text-gray-950 ">{product.name}</h3>
-                                            <p className="text-gray-900 font-extralight text-sm">
-                                                {isExpanded ? product.description : `${product.description.slice(0, 50)}...`}
-                                            </p>
-                                            {product.description.length > 50 && (
-                                                <button 
-                                                    onClick={() => setExpandedDescriptions(prev => ({
-                                                        ...prev, 
-                                                        [product.id]: !isExpanded
-                                                    }))}
-                                                    className="text-gray-950 hover:underline text-xs inline-block font-extrabold text-left"
-                                                >
-                                                    {isExpanded ? "Daha Az Göster" : "Daha Fazlasını Göster"}
-                                                </button>
-                                            )}
-                                            <div className="flex space-x-3 items-center">
-                                                <span className="text-gray-900 font-bold tracking-tighter text-2xl mt-4">{product.price.toFixed(2)} ₺</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+            {filteredCategories.map((category) => (
+                <div key={category.id}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 p-2 ">
+                        {category.products.map((product) => (
+                            <div key={product.id} className="bg-primaryWhite rounded-lg overflow-hidden flex flex-col w-full max-w-[250px] mx-auto text-center shadow-md border border-gray-200">
+                                <img
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    className="w-full h-48 object-cover rounded-t-lg"
+                                />
+                                <div className="px-4 py-6 flex flex-col space-y-2 flex-grow">
+                                    <h3 className="text-xl font-light text-gray-950">{product.name}</h3>
+                                    <span className="text-gray-900 font-bold tracking-tighter text-2xl">{product.price.toFixed(2)} ₺</span>
+                                    <button
+                                        onClick={() => openModal(product)} // Modal'ı açıyoruz
+                                        className="text-xs w-full font-extrabold bg-primaryMain py-2 text-primaryWhite rounded-md"
+                                    >
+                                        Detayları Göster
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                );
-            })}
+                </div>
+            ))}
+
+            {/* Modal Bileşeni */}
+            {isModalOpen && modalProduct && (
+                <ProductModal product={modalProduct} closeModal={closeModal} />
+            )}
         </div>
     );
 };
