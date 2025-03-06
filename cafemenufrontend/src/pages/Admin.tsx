@@ -15,6 +15,18 @@ const Admin = () => {
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingLogo, setEditingLogo] = useState<{ id: number; logoUrl: string; imageFile: File | null } | null>(null);
+    const handleIngredientsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const ingredients = e.target.value.split(',').map((item) => item.trim());
+        setNewProduct((prev) => ({ ...prev, ingredients }));
+    };
+
+    const handleEditingIngredientsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const ingredients = e.target.value.split(',').map((item) => item.trim());
+        if (editingProduct) {
+            setEditingProduct({ ...editingProduct, ingredients });
+        }
+    };
+
 
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newProduct, setNewProduct] = useState({
@@ -23,11 +35,13 @@ const Admin = () => {
         imageUrl: '',
         description: '',
         categoryId: 0,
-        imageFile: null as File | null
+        ingredients: [] as string[], // Yeni eklenen alan
+        imageFile: null as File | null,
     });
+
     const [newLogo, setNewLogo] = useState<{ logoUrl: string; imageFile: File | null }>({
         logoUrl: '',
-        imageFile: null
+        imageFile: null,
     });
 
     const navigate = useNavigate();
@@ -47,7 +61,7 @@ const Admin = () => {
             const [categoriesRes, productsRes, logosRes] = await Promise.all([
                 api.getCategories(),
                 api.getProducts(),
-                api.getLogos()
+                api.getLogos(),
             ]);
             setCategories(categoriesRes.data.sort((a, b) => a.categoryOrder - b.categoryOrder));
             setProducts(productsRes.data);
@@ -62,7 +76,7 @@ const Admin = () => {
     // Kategori sıralaması
     const updatedCategories = categories.map((category, index) => ({
         ...category,
-        order: index // sıralamayı güncelle
+        order: index, // sıralamayı güncelle
     }));
 
     try {
@@ -102,9 +116,9 @@ const Admin = () => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            setNewProduct(prev => ({
+            setNewProduct((prev) => ({
                 ...prev,
-                imageFile: file
+                imageFile: file,
             }));
         }
     };
@@ -113,7 +127,7 @@ const Admin = () => {
     const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            setNewLogo(prev => ({ ...prev, imageFile: file }));
+            setNewLogo((prev) => ({ ...prev, imageFile: file }));
         }
     };
 
@@ -148,7 +162,8 @@ const Admin = () => {
     };
 
     const handleDeleteCategory = async (id: number) => {
-        if (!window.confirm('Bu kategoriyi silmek istediğinize emin misiniz? Bu kategoriye ait tüm ürünler silinecektir')) return;
+        if (!window.confirm('Bu kategoriyi silmek istediğinize emin misiniz? Bu kategoriye ait tüm ürünler silinecektir'))
+            return;
         try {
             await api.deleteCategory(id);
             toast.success('Kategori başarıyla silindi');
@@ -181,10 +196,20 @@ const Admin = () => {
                 price: newProduct.price,
                 imageUrl,
                 description: newProduct.description,
-                category: { id: newProduct.categoryId }
+                category: { id: newProduct.categoryId },
+                ingredients: newProduct.ingredients, // ingredients alanını ekleyin
             });
             toast.success('Ürün başarıyla eklendi');
             fetchData();
+            setNewProduct({
+                name: '',
+                price: 0,
+                imageUrl: '',
+                description: '',
+                categoryId: 0,
+                ingredients: [], // ingredients alanını sıfırlayın
+                imageFile: null,
+            });
         } catch (error) {
             toast.error('Ürün eklenirken bir hata oluştu');
         }
@@ -204,7 +229,8 @@ const Admin = () => {
                 price: editingProduct.price,
                 imageUrl,
                 description: editingProduct.description,
-                category: { id: editingProduct.category?.id ?? 0 }
+                category: { id: editingProduct.category?.id ?? 0 },
+                ingredients: editingProduct.ingredients, // ingredients alanını ekleyin
             });
             toast.success('Ürün başarıyla kaydedildi');
             fetchData();
@@ -213,7 +239,6 @@ const Admin = () => {
             toast.error('Ürün güncellenirken bir hata oluştu');
         }
     };
-
     const handleDeleteProduct = async (id: number) => {
         if (!window.confirm('Bu ürünü silmek istediğinize emin misiniz')) return;
         try {
@@ -459,7 +484,7 @@ const Admin = () => {
                                     placeholder="Fiyat"
                                     className="p-2 border rounded"
                                 />
-                                <input 
+                                <input
                                     type="file"
                                     accept=".png, .jpeg, .jpg"
                                     onChange={handleFileChange}
@@ -483,6 +508,15 @@ const Admin = () => {
                                     value={newProduct.description}
                                     onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                                     placeholder="Ürün açıklaması"
+                                    className="p-2 border rounded col-span-2"
+                                />
+                                <textarea
+                                    value={newProduct.ingredients.join(', ')} // Ingredients dizisini virgüllerle ayarlıyoruz
+                                    onChange={(e) => {
+                                        const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim()); // Virgülleri ayırıp diziye çeviriyoruz
+                                        setNewProduct({ ...newProduct, ingredients });
+                                    }}
+                                    placeholder="İçindekiler (Virgülle ayırın)"
                                     className="p-2 border rounded col-span-2"
                                 />
                                 <button
@@ -520,7 +554,7 @@ const Admin = () => {
                                                         onChange={(e) =>
                                                             setEditingProduct({
                                                                 ...editingProduct,
-                                                                price: parseFloat(e.target.value)
+                                                                price: parseFloat(e.target.value),
                                                             })
                                                         }
                                                         className="w-full p-2 border rounded"
@@ -530,9 +564,18 @@ const Admin = () => {
                                                         onChange={(e) =>
                                                             setEditingProduct({
                                                                 ...editingProduct,
-                                                                description: e.target.value
+                                                                description: e.target.value,
                                                             })
                                                         }
+                                                        className="w-full p-2 border rounded"
+                                                    />
+                                                    <textarea
+                                                        value={editingProduct.ingredients.join(', ')} // ingredients'ı virgüllerle ayarlıyoruz
+                                                        onChange={(e) => {
+                                                            const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim());
+                                                            setEditingProduct({ ...editingProduct, ingredients });
+                                                        }}
+                                                        placeholder="İçindekiler (Virgülle ayırın)"
                                                         className="w-full p-2 border rounded"
                                                     />
                                                     <button
@@ -546,6 +589,14 @@ const Admin = () => {
                                                 <>
                                                     <h3 className="text-lg font-semibold">{product.name}</h3>
                                                     <p className="text-gray-600 mt-1">{product.description}</p>
+                                                    <div className="mt-4">
+                                                        <h4 className="text-sm font-semibold">İçindekiler:</h4>
+                                                        <ul className="text-sm text-gray-600">
+                                                            {product.ingredients?.map((ingredient, index) => (
+                                                                <li key={index}>{ingredient}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
                                                     <div className="mt-4 flex justify-between items-center">
                                                         <span className="text-amber-600 font-bold">
                                                             ₺{product.price.toFixed(2)}
@@ -574,88 +625,88 @@ const Admin = () => {
                         </div>
                     }
                 />
-                <Route
-    path="/logos"
-    element={
-        <div className="space-y-6">
-            {logos.length === 0 ? (
-                <div className="flex flex-col space-y-7 items-center space-x-4">
-                    <input
-                        type="file"
-                        accept=".png, .jpeg, .jpg"
-                        onChange={handleLogoFileChange}
-                        className="p-2 border rounded"
-                    />
-                    <button
-                        onClick={handleAddLogo}
-                        className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center space-x-2"
-                    >
-                        <PlusCircle className="h-5 w-5" />
-                        <span>Logo Ekle</span>
-                    </button>
-                </div>
-            ) : (
-                <div className="bg-white rounded-lg shadow-md overflow-hidden p-4">
-                    <img
-                        src={
-                            logos[0].logoUrl.startsWith('http')
-                                ? logos[0].logoUrl
-                                : `https://via.placeholder.com/300x150.png?text=Logo`
-                        }
-                        alt="Logo"
-                        className="w-full h-32 object-contain"
-                    />
-                    <div className="mt-6 flex  flex-col space-y-5 justify-between items-center">
-                        {editingLogo && editingLogo.id === logos[0].id ? (
-                            <>
-                                <input
-                                    type="file"
-                                    accept=".png, .jpeg, .jpg"
-                                    onChange={handleEditingLogoFileChange}
-                                    className="p-2 border rounded"
-                                />
-                                <button
-                                    onClick={() => handleUpdateLogo(logos[0].id)}
-                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                >
-                                    Kaydet
-                                </button>
-                                <button
-                                    onClick={() => setEditingLogo(null)}
-                                    className="text-gray-600 hover:text-gray-800"
-                                >
-                                    Vazgeç
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() =>
-                                        setEditingLogo({
-                                            id: logos[0].id,
-                                            logoUrl: logos[0].logoUrl,
-                                            imageFile: null,
-                                        })
-                                    }
-                                    className="text-amber-600 hover:text-amber-700"
-                                >
-                                    <Edit2 className="h-5 w-5" />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteLogo(logos[0].id)}
-                                    className="text-red-600 hover:text-red-700"
-                                >
-                                    <Trash2 className="h-5 w-5" />
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    }
-/>
 
+                <Route
+                    path="/logos"
+                    element={
+                        <div className="space-y-6">
+                            {logos.length === 0 ? (
+                                <div className="flex flex-col space-y-7 items-center space-x-4">
+                                    <input
+                                        type="file"
+                                        accept=".png, .jpeg, .jpg"
+                                        onChange={handleLogoFileChange}
+                                        className="p-2 border rounded"
+                                    />
+                                    <button
+                                        onClick={handleAddLogo}
+                                        className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center space-x-2"
+                                    >
+                                        <PlusCircle className="h-5 w-5" />
+                                        <span>Logo Ekle</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                                    <img
+                                        src={
+                                            logos[0].logoUrl.startsWith('http')
+                                                ? logos[0].logoUrl
+                                                : `https://via.placeholder.com/300x150.png?text=Logo`
+                                        }
+                                        alt="Logo"
+                                        className="w-full h-32 object-contain"
+                                    />
+                                    <div className="mt-6 flex  flex-col space-y-5 justify-between items-center">
+                                        {editingLogo && editingLogo.id === logos[0].id ? (
+                                            <>
+                                                <input
+                                                    type="file"
+                                                    accept=".png, .jpeg, .jpg"
+                                                    onChange={handleEditingLogoFileChange}
+                                                    className="p-2 border rounded"
+                                                />
+                                                <button
+                                                    onClick={() => handleUpdateLogo(logos[0].id)}
+                                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                                                >
+                                                    Kaydet
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingLogo(null)}
+                                                    className="text-gray-600 hover:text-gray-800"
+                                                >
+                                                    Vazgeç
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() =>
+                                                        setEditingLogo({
+                                                            id: logos[0].id,
+                                                            logoUrl: logos[0].logoUrl,
+                                                            imageFile: null,
+                                                        })
+                                                    }
+                                                    className="text-amber-600 hover:text-amber-700"
+                                                >
+                                                    <Edit2 className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteLogo(logos[0].id)}
+                                                    className="text-red-600 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    }
+                />
             </Routes>
         </div>
     );

@@ -1,35 +1,65 @@
+import { FaArrowLeft } from 'react-icons/fa';
 import React from 'react';
 
 const ProductModal = ({ product, closeModal }: { product: any, closeModal: () => void }) => {
-    return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center z-50">
-            <div className="relative bg-white w-full h-full max-w-4xl mx-auto flex flex-col p-6 md:p-10 rounded-none md:rounded-lg shadow-lg">
-                
-                
+    const [showFullDescription, setShowFullDescription] = React.useState(false);
 
-                {/* Ürün Görseli */}
-                <div className="w-full h-2/5 md:h-3/5">
-                    <img 
-                        src={product.imageUrl} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover rounded-lg"
+    const toggleDescription = () => {
+        setShowFullDescription(!showFullDescription);
+    };
+
+    return (
+        <div className="fixed inset-10 bg-opacity-80 flex justify-center items-center flex-col z-50 transition-opacity duration-500 opacity-0 scale-90 animate-open">
+            <div className="relative bg-neutral-50 w-full h-full max-w-lg mx-auto flex space-y-6 p-4 flex-col md:p-10 rounded-none md:rounded-lg shadow-lg">
+
+                {/* Back Arrow Button */}
+                <button
+                    onClick={closeModal}
+                    className=" text-neutral-700 text-xl m-2"
+                >
+                    <FaArrowLeft />
+                </button>
+
+                {/* Product Name */}
+                <h1 className="text-xl font-light tracking-wide text-neutral-800 mt-16">{product.name}</h1>
+
+                {/* Product Image */}
+                <div className="w-full mb-6">
+                    <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-64 object-cover "
                     />
                 </div>
 
-                {/* Ürün Bilgileri */}
-                <div className="flex flex-col items-center text-center flex-grow justify-center space-y-4 mt-6">
-                    <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                    <p className="text-gray-700 text-lg">{product.description}</p>
-                    <span className="text-3xl font-semibold text-primaryMain">{product.price.toFixed(2)} ₺</span>
+
+
+                {/* Product Description */}
+                <h2 className="text-xl font-semibold text-neutral-700 mb-2">Ürün Açıklaması</h2>
+                <div className="">
+                    <p className="text-neutral-500 font-extralight tracking-wider text-sm">
+                        {showFullDescription
+                            ? product.description
+                            : `${product.description.slice(0, 150)}${product.description.length > 150 ? '...' : ''}`}
+                             {/* Show More/Less Button */}
+                    {product.description.length > 150 && (
+                        <button
+                            onClick={toggleDescription}
+                            className="text-neutral-900 text-sm font-semibold underline"
+                        >
+                            {showFullDescription ? "Daha az " : "Daha Fazla"}
+                        </button>
+                    )}
+                    </p>
+                   
+
+                </div>
+                {/* Product Price */}
+                <div className="flex items-center justify-between mb-6">
+                    <span className="text-xl font-semibold text-neutral-700">{product.price.toFixed(2)} ₺</span>
+                    
                 </div>
 
-                {/* Kapat Butonu */}
-                <button
-                    onClick={closeModal}
-                    className="w-full mt-6 py-4 bg-secondaryMain text-white text-xl font-semibold rounded-lg shadow-md transition duration-300 hover:bg-secondaryDark"
-                >
-                    Kapat
-                </button>
             </div>
         </div>
     );

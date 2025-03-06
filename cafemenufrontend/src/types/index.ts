@@ -1,4 +1,4 @@
-//types/index.ts
+
 
 export interface Product {
     id: number;
@@ -6,10 +6,12 @@ export interface Product {
     price: number;
     imageUrl: string;
     description: string;
+    ingredients: string[]; // Yeni eklenen alan
     category?: Partial<Category>;
 }
 
 export interface Category {
+    content: any;
     id: number;
     name: string;
     categoryOrder: number;
@@ -22,12 +24,12 @@ export interface CreateProductDto {
     price: number;
     imageUrl: string;
     description: string;
+    ingredients: string[]; // Yeni eklenen alan
     category: {
         id: number;
     };
-
-
 }
+
 
 export interface Logo {
     id: number;

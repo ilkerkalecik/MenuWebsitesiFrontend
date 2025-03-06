@@ -1,6 +1,3 @@
-//api/index.ts
-
-
 import axios from 'axios';
 import { Category, Product, CreateProductDto } from '../types';
 
@@ -14,8 +11,7 @@ export const api = {
         if (response.status !== 200) {
             throw new Error('Login failed');
         }
-        // Backend'in döndürdüğü JSON { token: '...' } şeklinde olmalı.
-        return response.data.token;
+        return response.data.token;  // Backend'in döndürdüğü JSON { token: '...' } şeklinde olmalı.
     },
 
     // Category endpoints
@@ -27,19 +23,24 @@ export const api = {
 
     // Product endpoints
     getProducts: () => axios.get<Product[]>(`${API_URL}/product`),
-    // Tek bir ürünü ID'ye göre getir
-    getProductById: (id:  number) => axios.get<Product>(`${API_URL}/product/${id}`),
+    getProductById: (id: number) => axios.get<Product>(`${API_URL}/product/${id}`),
 
     addProduct: (product: CreateProductDto) => axios.post(`${API_URL}/product`, product),
     updateProduct: (id: number, product: Partial<CreateProductDto>) =>
         axios.put(`${API_URL}/product/${id}`, product),
     deleteProduct: (id: number) => axios.delete(`${API_URL}/product/${id}`),
+
+    // İçindekilerle birlikte ürünü almayı ekledik
+    getProductWithIngredientsById: (id: number) => axios.get<Product>(`${API_URL}/product/${id}/with-ingredients`),
+
     uploadImage: (formData: FormData) =>
         axios.post(`${API_URL}/product/upload-image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         }),
+
+    // Admin veri çekme işlemi
     getAdminData: async () => {
         const token = localStorage.getItem("token");
 
@@ -55,7 +56,8 @@ export const api = {
 
         return response.data;
     },
-    // frontend tarafında updateCategoryOrder fonksiyonunuzu güncelleyin
+
+    // Kategori sırası güncelleme
     updateCategoryOrder: (categories: { id: number; order: number }[]) =>
         axios.put(`${API_URL}/category/order`, { categories: categories }),
 
@@ -63,6 +65,4 @@ export const api = {
     addLogo: (logoUrl: string) => axios.post(`${API_URL}/logo`, { logoUrl }),
     updateLogo: (id: number, logoUrl: string) => axios.put(`${API_URL}/logo/${id}`, { logoUrl }),
     deleteLogo: (id: number) => axios.delete(`${API_URL}/logo/${id}`),
-
 };
-
