@@ -127,15 +127,15 @@ const Menu = () => {
                         <div className="flex-grow border-t border-neutral-400"></div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-4 p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 p-4">
                         {category.products.map((product) => (
-                            <div key={product.id} className="flex flex-row items-center space-x-5 w-full">
-                                <h1 className="font-extralight tracking-wider">{product.name}</h1>
-                                <div className="flex-grow border-t border-neutral-300"></div>
-                                <p className="font-bold text-neutral-950">{product.price.toFixed(2)} ₺</p>
+                            <div key={product.id} className="flex flex-row items-center  space-x-4 w-full">
+                                <h1 className="font-extralight text-xs tracking-wider">{product.name}</h1>
+                                <div className="flex-grow border-dotted border-t border-neutral-400"></div>
+                                <p className="font-bold text-neutral-950 text-xs">{product.price.toFixed(2)} ₺</p>
                                 <button
                                     onClick={() => openModal(product)}
-                                    className="text-xs font-semibold  py-1 px-3 text-neutral-600 underline rounded-md hover:bg-primaryDark transition-all"
+                                    className="text-xs font-semibold  py-1 px-3 text-neutral-600 underline rounded-md hover:bg-primaryDark transition-all "
                                 >
                                     Detaylar...
                                 </button>
@@ -144,7 +144,7 @@ const Menu = () => {
                     </div>
 
                 </div>
-            ))}
+            ))} 
 
             {/* Modal Bileşeni */}
             {isModalOpen && modalProduct && (

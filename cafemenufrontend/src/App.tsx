@@ -9,7 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute.tsx';
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen bg-secondaryWhite">
+      <div className="flex min-h-screen bg-secondaryWhite font-lato">
         {/* Sidebar */}
         <Sidebar />
 

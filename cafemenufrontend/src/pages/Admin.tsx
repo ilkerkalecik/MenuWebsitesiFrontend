@@ -15,18 +15,7 @@ const Admin = () => {
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingLogo, setEditingLogo] = useState<{ id: number; logoUrl: string; imageFile: File | null } | null>(null);
-    const handleIngredientsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const ingredients = e.target.value.split(',').map((item) => item.trim());
-        setNewProduct((prev) => ({ ...prev, ingredients }));
-    };
-
-    const handleEditingIngredientsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const ingredients = e.target.value.split(',').map((item) => item.trim());
-        if (editingProduct) {
-            setEditingProduct({ ...editingProduct, ingredients });
-        }
-    };
-
+   
 
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newProduct, setNewProduct] = useState({

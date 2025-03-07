@@ -8,9 +8,12 @@ const ProductModal = ({ product, closeModal }: { product: any, closeModal: () =>
         setShowFullDescription(!showFullDescription);
     };
 
+    // Ingredients filter to exclude empty strings
+    const filteredIngredients = product.ingredients.filter((ingredient: string) => ingredient.trim() !== "");
+
     return (
-        <div className="fixed inset-10 bg-opacity-80 flex justify-center items-center flex-col z-50 transition-opacity duration-500 opacity-0 scale-90 animate-open">
-            <div className="relative bg-neutral-50 w-full h-full max-w-lg mx-auto flex space-y-6 p-4 flex-col md:p-10 rounded-none md:rounded-lg shadow-lg">
+        <div className="fixed inset-8 bg-opacity-80 flex justify-center items-center flex-col z-50 transition-opacity duration-500 opacity-0 scale-90 animate-open">
+            <div className="relative bg-neutral-50 w-full h-full max-w-lg mx-auto flex space-y-4 p-10 flex-col md:p-10 rounded-none md:rounded-lg shadow-lg">
 
                 {/* Back Arrow Button */}
                 <button
@@ -21,43 +24,53 @@ const ProductModal = ({ product, closeModal }: { product: any, closeModal: () =>
                 </button>
 
                 {/* Product Name */}
-                <h1 className="text-xl font-light tracking-wide text-neutral-800 mt-16">{product.name}</h1>
+                <h1 className="text-3xl font-semibold tracking-wide text-neutral-700 mt-16">{product.name}</h1>
 
                 {/* Product Image */}
-                <div className="w-full mb-6">
+                <div className="w-full flex items-center justify-center ">
                     <img
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-64 object-cover "
+                        className=" h-64 border border-neutral-200 rounded-md"
                     />
                 </div>
 
-
-
                 {/* Product Description */}
-                <h2 className="text-xl font-semibold text-neutral-700 mb-2">Ürün Açıklaması</h2>
+                <h2 className="text-2xl font-semibold tracking-wide text-neutral-700">Ürün Açıklaması</h2>
                 <div className="">
-                    <p className="text-neutral-500 font-extralight tracking-wider text-sm">
+                    <p className="text-neutral-600 font-light text-sm">
                         {showFullDescription
                             ? product.description
                             : `${product.description.slice(0, 150)}${product.description.length > 150 ? '...' : ''}`}
-                             {/* Show More/Less Button */}
-                    {product.description.length > 150 && (
-                        <button
-                            onClick={toggleDescription}
-                            className="text-neutral-900 text-sm font-semibold underline"
-                        >
-                            {showFullDescription ? "Daha az " : "Daha Fazla"}
-                        </button>
-                    )}
+                        {/* Show More/Less Button */}
+                        {product.description.length > 150 && (
+                            <button
+                                onClick={toggleDescription}
+                                className="text-neutral-900 text-sm font-semibold underline"
+                            >
+                                {showFullDescription ? "Daha az " : "Daha Fazla"}
+                            </button>
+                        )}
                     </p>
-                   
 
+                    {/* Product Ingredients */}
+                    {filteredIngredients.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-xl font-semibold tracking-wide text-neutral-700">İçindekiler</h3>
+                            <ul className="grid grid-cols-3 gap-3 text-sm text-neutral-600">
+                                {filteredIngredients.map((ingredient: string, index: number) => (
+                                    <li className='border p-3 capitalize rounded-lg border-neutral-400 mt-4 font-bold text-neutral-600 text-xs text-center' key={index}>
+                                        {ingredient}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
+
                 {/* Product Price */}
-                <div className="flex items-center justify-between mb-6">
-                    <span className="text-xl font-semibold text-neutral-700">{product.price.toFixed(2)} ₺</span>
-                    
+                <div className="flex items-center justify-between ">
+                    <span className="text-3xl font-extrabold text-neutral-700">{product.price.toFixed(2)} ₺</span>
                 </div>
 
             </div>
