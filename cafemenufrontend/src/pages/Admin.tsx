@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Category, Product, Logo } from '../types';
 import { api } from '../api';
-import { PlusCircle, Edit2, Trash2, GripVertical } from 'lucide-react';
+import { PlusCircle, Edit2, Trash2, GripVertical, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -15,7 +15,7 @@ const Admin = () => {
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingLogo, setEditingLogo] = useState<{ id: number; logoUrl: string; imageFile: File | null } | null>(null);
-   
+
 
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newProduct, setNewProduct] = useState({
@@ -24,7 +24,7 @@ const Admin = () => {
         imageUrl: '',
         description: '',
         categoryId: 0,
-        ingredients: [] as string[], // Yeni eklenen alan
+        ingredients: [] as string[],
         imageFile: null as File | null,
     });
 
@@ -111,6 +111,13 @@ const Admin = () => {
             }));
         }
     };
+    const removeFile = () => {
+        setNewProduct((prev) => ({
+            ...prev,
+            imageFile: null,
+        }));
+    };
+
 
     // Logo dosyası için dosya seçimi (ekleme)
     const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -310,28 +317,28 @@ const Admin = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-10 max-w-screen-xl mx-auto">
             <div className="flex justify-end">
                 <button
                     onClick={handleLogout}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    className="bg-neutral-800 text-neutral-100 px-4 py-2 rounded hover:shadow-lg font-light tracking-wider "
                 >
                     Çıkış Yap
                 </button>
             </div>
 
-            <div className="flex space-x-4 border-b">
+            <div className="flex space-x-4   tracking-wider">
                 <Link
                     to="/admin"
                     className={`pb-2 px-4 ${activeTab === 'categories'
-                        ? 'border-b-2 border-amber-600 text-amber-600'
-                        : 'text-gray-600'
+                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
+                        : 'text-neutral-600'
                         }`}
                 >
                     Kategoriler
@@ -339,8 +346,8 @@ const Admin = () => {
                 <Link
                     to="/admin/products"
                     className={`pb-2 px-4 ${activeTab === 'products'
-                        ? 'border-b-2 border-amber-600 text-amber-600'
-                        : 'text-gray-600'
+                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
+                        : 'text-neutral-600'
                         }`}
                 >
                     Ürünler
@@ -348,8 +355,8 @@ const Admin = () => {
                 <Link
                     to="/admin/logos"
                     className={`pb-2 px-4 ${activeTab === 'logos'
-                        ? 'border-b-2 border-amber-600 text-amber-600'
-                        : 'text-gray-600'
+                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
+                        : 'text-neutral-600'
                         }`}
                 >
                     Logo
@@ -367,13 +374,14 @@ const Admin = () => {
                                     value={newCategoryName}
                                     onChange={(e) => setNewCategoryName(e.target.value)}
                                     placeholder="Yeni kategori ismi giriniz"
-                                    className="flex-1 p-2 border rounded"
+                                    className="flex-1 p-2 border border-neutral-300 rounded tracking-wide  focus:border-neutral-900 outline-none bg-neutral-50"
                                 />
+
                                 <button
                                     onClick={handleAddCategory}
-                                    className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+                                    className="bg-neutral-800 text-white px-4 py-2 rounded hover:shadow-2xl border-neutral-900"
                                 >
-                                    <PlusCircle className="h-5 w-5" />
+                                    <PlusCircle className="h-5 w-5 m-0.5" />
                                 </button>
                             </div>
 
@@ -383,7 +391,7 @@ const Admin = () => {
                                         <div
                                             {...provided.droppableProps}
                                             ref={provided.innerRef}
-                                            className="space-y-4"
+                                            className="space-y-3"
                                         >
                                             {categories.map((category, index) => (
                                                 <Draggable
@@ -395,14 +403,14 @@ const Admin = () => {
                                                         <div
                                                             ref={provided.innerRef}
                                                             {...provided.draggableProps}
-                                                            className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
+                                                            className="flex items-center justify-between bg-neutral-100 p-4 rounded-lg shadow"
                                                         >
                                                             <div className="flex items-center flex-1">
                                                                 <div
                                                                     {...provided.dragHandleProps}
                                                                     className="mr-3 cursor-grab"
                                                                 >
-                                                                    <GripVertical className="h-5 w-5 text-gray-400" />
+                                                                    <GripVertical className="h-5 w-5 text-neutral-600" />
                                                                 </div>
                                                                 {editingCategory?.id === category.id ? (
                                                                     <input
@@ -411,24 +419,24 @@ const Admin = () => {
                                                                         onChange={(e) =>
                                                                             setEditingCategory({ ...editingCategory, name: e.target.value })
                                                                         }
-                                                                        className="flex-1 p-2 border rounded mr-4"
+                                                                        className="flex-1 p-2 border focus:border-black outline-none  rounded bg-white mr-4  tracking-wide text-neutral-950"
                                                                     />
                                                                 ) : (
-                                                                    <span className="text-lg">{category.name}</span>
+                                                                    <span className=" tracking-wide text-neutral-700">{category.name}</span>
                                                                 )}
                                                             </div>
-                                                            <div className="flex space-x-2">
+                                                            <div className="flex space-x-4" >
                                                                 {editingCategory?.id === category.id ? (
                                                                     <button
                                                                         onClick={() => handleUpdateCategory(category.id, editingCategory.name)}
-                                                                        className="text-green-600 hover:text-green-700"
+                                                                        className="text-neutral-800  hover:text-neutral-950 hover:shadow-2xl font-medium tracking-wider"
                                                                     >
                                                                         Kaydet
                                                                     </button>
                                                                 ) : (
                                                                     <button
                                                                         onClick={() => setEditingCategory(category)}
-                                                                        className="text-amber-600 hover:text-amber-700"
+                                                                        className="text-neutral-700-600 hover:shadow-2xl"
                                                                     >
                                                                         <Edit2 className="h-5 w-5" />
                                                                     </button>
@@ -455,36 +463,54 @@ const Admin = () => {
                 <Route
                     path="/products"
                     element={
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input
-                                    type="text"
-                                    value={newProduct.name}
-                                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                                    placeholder="Ürün ismi"
-                                    className="p-2 border rounded"
-                                />
-                                <input
-                                    type="number"
-                                    value={newProduct.price}
-                                    onChange={(e) =>
-                                        setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })
-                                    }
-                                    placeholder="Fiyat"
-                                    className="p-2 border rounded"
-                                />
-                                <input
-                                    type="file"
-                                    accept=".png, .jpeg, .jpg"
-                                    onChange={handleFileChange}
-                                    className="p-2 border rounded bg-white"
-                                />
+                        <div className="space-y-6 mx-auto ">
+                            <div className="flex flex-col space-y-3 tracking-wide">
+                                {/* Ürün ismi ve fiyat yan yana */}
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        value={newProduct.name}
+                                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                                        placeholder="Ürün ismi"
+                                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50 "
+                                    />
+                                    <input
+                                        type="number"
+                                        value={newProduct.price}
+                                        onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                                        placeholder="Fiyat"
+                                        className="w-40 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
+                                    />
+                                </div>
+
+                                {/* Fotoğraf Yükleme ve Kaldır Butonu */}
+                                <div className="flex items-center space-x-3">
+                                    <label className="flex-1 flex items-center justify-center p-2 border border-gray-300 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200 transition-all">
+                                        <input type="file" accept=".png, .jpeg, .jpg" onChange={handleFileChange} className="hidden" />
+                                        {newProduct.imageFile ? (
+                                            <div className="flex items-center gap-2 text-green-600">
+                                                <CheckCircle size={20} />
+                                                <span className="truncate max-w-[150px] text-sm">{newProduct.imageFile.name}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-600">Ürün Fotoğrafı Yükle (.jpeg .jpg .png)</span>
+                                        )}
+                                    </label>
+                                    {newProduct.imageFile && (
+                                        <button
+                                            onClick={removeFile}
+                                            className="flex items-center gap-1 text-white text-sm hover:bg-neutral-900 transition-all bg-neutral-800 p-3 rounded-lg"
+                                        >
+                                            <XCircle size={16} /> Kaldır
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Kategori Seçme */}
                                 <select
                                     value={newProduct.categoryId}
-                                    onChange={(e) =>
-                                        setNewProduct({ ...newProduct, categoryId: parseInt(e.target.value) })
-                                    }
-                                    className="p-2 border rounded"
+                                    onChange={(e) => setNewProduct({ ...newProduct, categoryId: parseInt(e.target.value) })}
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
                                 >
                                     <option value={0}>Kategori seç</option>
                                     {categories.map((category) => (
@@ -493,124 +519,132 @@ const Admin = () => {
                                         </option>
                                     ))}
                                 </select>
+
+                                {/* Ürün Açıklaması */}
                                 <textarea
                                     value={newProduct.description}
                                     onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                                     placeholder="Ürün açıklaması"
-                                    className="p-2 border rounded col-span-2"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
+                                    rows={3}
                                 />
+
+                                {/* İçindekiler */}
                                 <textarea
-                                    value={newProduct.ingredients.join(', ')} // Ingredients dizisini virgüllerle ayarlıyoruz
+                                    value={newProduct.ingredients.join(', ')}
                                     onChange={(e) => {
-                                        const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim()); // Virgülleri ayırıp diziye çeviriyoruz
+                                        const ingredients = e.target.value.split(',').map((ingredient) => ingredient.trim());
                                         setNewProduct({ ...newProduct, ingredients });
                                     }}
                                     placeholder="İçindekiler (Virgülle ayırın)"
-                                    className="p-2 border rounded col-span-2"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
+                                    rows={2}
                                 />
+
+                                {/* Ürünü Ekle Butonu */}
                                 <button
                                     onClick={handleAddProduct}
-                                    className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 col-span-2"
+                                    className="w-full bg-neutral-800 text-white px-6 py-3 rounded-lg transition-all"
                                 >
-                                    Ürünü ekle
+                                    Ürünü Ekle
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {products.map((product) => (
-                                    <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                                        <img
-                                            src={product.imageUrl.startsWith('http')
-                                                ? product.imageUrl
-                                                : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=300&fit=crop`}
-                                            alt={product.name}
-                                            className="w-full h-48 object-cover"
+
+
+                            <div className="space-y-8">
+    {categories.map((category) => {
+        const filteredProducts = products.filter((product) => product.category?.id === category.id);
+
+        return filteredProducts.length > 0 ? (
+            <div key={category.id}>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">{category.name}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                        <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+                            <img
+                                src={product.imageUrl.startsWith('http') ? product.imageUrl : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=300&fit=crop'}
+                                alt={product.name}
+                                className="w-full h-48 object-cover"
+                            />
+                            <div className="p-4">
+                                {editingProduct?.id === product.id ? (
+                                    <div className="space-y-2">
+                                        <input
+                                            type="text"
+                                            value={editingProduct.name}
+                                            onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         />
-                                        <div className="p-4">
-                                            {editingProduct?.id === product.id ? (
-                                                <div className="space-y-2">
-                                                    <input
-                                                        type="text"
-                                                        value={editingProduct.name}
-                                                        onChange={(e) =>
-                                                            setEditingProduct({ ...editingProduct, name: e.target.value })
-                                                        }
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                    <input
-                                                        type="number"
-                                                        value={editingProduct.price}
-                                                        onChange={(e) =>
-                                                            setEditingProduct({
-                                                                ...editingProduct,
-                                                                price: parseFloat(e.target.value),
-                                                            })
-                                                        }
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                    <textarea
-                                                        value={editingProduct.description}
-                                                        onChange={(e) =>
-                                                            setEditingProduct({
-                                                                ...editingProduct,
-                                                                description: e.target.value,
-                                                            })
-                                                        }
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                    <textarea
-                                                        value={editingProduct.ingredients.join(', ')} // ingredients'ı virgüllerle ayarlıyoruz
-                                                        onChange={(e) => {
-                                                            const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim());
-                                                            setEditingProduct({ ...editingProduct, ingredients });
-                                                        }}
-                                                        placeholder="İçindekiler (Virgülle ayırın)"
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                    <button
-                                                        onClick={() => handleUpdateProduct(product.id)}
-                                                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                                    >
-                                                        Kaydet
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <h3 className="text-lg font-semibold">{product.name}</h3>
-                                                    <p className="text-gray-600 mt-1">{product.description}</p>
-                                                    <div className="mt-4">
-                                                        <h4 className="text-sm font-semibold">İçindekiler:</h4>
-                                                        <ul className="text-sm text-gray-600">
-                                                            {product.ingredients?.map((ingredient, index) => (
-                                                                <li key={index}>{ingredient}</li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                    <div className="mt-4 flex justify-between items-center">
-                                                        <span className="text-amber-600 font-bold">
-                                                            ₺{product.price.toFixed(2)}
-                                                        </span>
-                                                        <div className="flex space-x-2">
-                                                            <button
-                                                                onClick={() => setEditingProduct(product)}
-                                                                className="text-amber-600 hover:text-amber-700"
-                                                            >
-                                                                <Edit2 className="h-5 w-5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteProduct(product.id)}
-                                                                className="text-red-600 hover:text-red-700"
-                                                            >
-                                                                <Trash2 className="h-5 w-5" />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
+                                        <input
+                                            type="number"
+                                            value={editingProduct.price}
+                                            onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                        />
+                                        <textarea
+                                            value={editingProduct.description}
+                                            onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                        />
+                                        <textarea
+                                            value={editingProduct.ingredients.join(', ')}
+                                            onChange={(e) => {
+                                                const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim());
+                                                setEditingProduct({ ...editingProduct, ingredients });
+                                            }}
+                                            placeholder="İçindekiler (Virgülle ayırın)"
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                        />
+                                        <button
+                                            onClick={() => handleUpdateProduct(product.id)}
+                                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+                                        >
+                                            Kaydet
+                                        </button>
                                     </div>
-                                ))}
+                                ) : (
+                                    <>
+                                        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
+                                        <p className="text-gray-600 mt-1">{product.description}</p>
+                                        <div className="mt-4">
+                                            <h4 className="text-sm font-semibold text-gray-800">İçindekiler:</h4>
+                                            <ul className="text-sm text-gray-600">
+                                                {product.ingredients?.map((ingredient, index) => (
+                                                    <li key={index}>{ingredient}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        <div className="mt-4 flex justify-between items-center">
+                                            <span className="text-amber-600 font-bold">
+                                                ₺{product.price.toFixed(2)}
+                                            </span>
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => setEditingProduct(product)}
+                                                    className="text-amber-600 hover:text-amber-700 transition-all"
+                                                >
+                                                    <Edit2 className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteProduct(product.id)}
+                                                    className="text-red-600 hover:text-red-700 transition-all"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ) : null;
+    })}
+</div>
+
                         </div>
                     }
                 />
