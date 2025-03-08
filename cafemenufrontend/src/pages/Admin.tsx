@@ -1,24 +1,64 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Category, Product, Logo } from '../types';
+import { Category, Product, Logo, CreateProductDto } from '../types';
 import { api } from '../api';
 import { PlusCircle, Edit2, Trash2, GripVertical, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Coffee, Dessert, EggFried, FishSymbol, GlassWater, Heart, IceCream, Pizza, Utensils, Vegan, Wine, ChevronUp } from 'lucide-react';
+
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import ProductUpdateModal from './ProductUptadeModal';
+
+
 
 const Admin = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [logos, setLogos] = useState<Logo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingLogo, setEditingLogo] = useState<{ id: number; logoUrl: string; imageFile: File | null } | null>(null);
+    const [editingImageFile, setEditingImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const getCategoryIcon = (kategoriAdi: string) => {
+        const lowerKategori = kategoriAdi.toLocaleLowerCase("tr");
 
+        if (lowerKategori.includes("soğuk içecek") || lowerKategori.includes("içecek")) return GlassWater;
+        if (lowerKategori.includes("kahve") || lowerKategori.includes("sıcak içecek")) return Coffee;
+        if (lowerKategori.includes("balık") || lowerKategori.includes("deniz")) return FishSymbol;
+        if (lowerKategori.includes("dondurma")) return IceCream;
+        if (lowerKategori.includes("salata")) return Heart;
+        if (lowerKategori.includes("kebap") || lowerKategori.includes("ızgara")) return Utensils;
+        if (lowerKategori.includes("pide") || lowerKategori.includes("lahmacun")) return Utensils;
+        if (lowerKategori.includes("kahvaltı")) return EggFried;
+        if (lowerKategori.includes("dürüm")) return Utensils;
+        if (lowerKategori.includes("pizza")) return Pizza;
+        if (lowerKategori.includes("alkol")) return Wine;
+        if (lowerKategori.includes("tatlı")) return Dessert;
+        if (lowerKategori.includes("vegan")) return Vegan;
 
+        return Utensils;
+    };
+    useEffect(() => {
+        if (editingImageFile) {
+            const url = URL.createObjectURL(editingImageFile);
+            setImagePreview(url);
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setImagePreview(null);
+        }
+    }, [editingImageFile]);
+
+    const filteredCategories = selectedCategory
+        ? categories.filter(category => category.name === selectedCategory)
+        : categories;
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newProduct, setNewProduct] = useState({
+        id: 0,  // ID alanını ekledik
+
         name: '',
         price: 0,
         imageUrl: '',
@@ -32,7 +72,10 @@ const Admin = () => {
         logoUrl: '',
         imageFile: null,
     });
+    const handleCategoryChange = (categoryName: string | null) => {
+        setSelectedCategory(categoryName);
 
+    };
     const navigate = useNavigate();
     const location = useLocation();
     const activeTab = location.pathname.includes('products')
@@ -198,6 +241,8 @@ const Admin = () => {
             toast.success('Ürün başarıyla eklendi');
             fetchData();
             setNewProduct({
+                id: 0,  // ID alanını ekledik
+
                 name: '',
                 price: 0,
                 imageUrl: '',
@@ -211,38 +256,36 @@ const Admin = () => {
         }
     };
 
-    const handleUpdateProduct = async (id: number) => {
+    const handleUpdateProduct = async (updatedProduct: CreateProductDto) => {
         if (!editingProduct) return;
 
         let imageUrl = editingProduct.imageUrl;
-        if (!newProduct.imageFile && !editingProduct.imageUrl) {
-            imageUrl = 'https://via.placeholder.com/500x300.png?text=Default+Image';
+
+        // Eğer yeni bir resim seçildiyse, onu sunucuya yükle
+        if (editingImageFile) {
+            try {
+                const formData = new FormData();
+                formData.append('file', editingImageFile);
+                const uploadRes = await api.uploadImage(formData);
+                imageUrl = uploadRes.data.url;
+            } catch (error) {
+                toast.error('Fotoğraf yüklenirken bir hata oluştu');
+                return;
+            }
         }
 
         try {
-            await api.updateProduct(id, {
-                name: editingProduct.name,
-                price: editingProduct.price,
-                imageUrl,
-                description: editingProduct.description,
-                category: { id: editingProduct.category?.id ?? 0 },
-                ingredients: editingProduct.ingredients, // ingredients alanını ekleyin
+            // API'ye güncellenmiş ürün bilgilerini gönder
+            await api.updateProduct(editingProduct.id, {
+                ...updatedProduct,
+                imageUrl, // Yeni resim URL'sini ekle
             });
-            toast.success('Ürün başarıyla kaydedildi');
-            fetchData();
-            setEditingProduct(null);
+            toast.success('Ürün başarıyla güncellendi');
+            fetchData(); // Ürün listesini yeniden çek
+            setEditingProduct(null); // Modal'ı kapat
+            setEditingImageFile(null); // Resim dosyasını temizle
         } catch (error) {
             toast.error('Ürün güncellenirken bir hata oluştu');
-        }
-    };
-    const handleDeleteProduct = async (id: number) => {
-        if (!window.confirm('Bu ürünü silmek istediğinize emin misiniz')) return;
-        try {
-            await api.deleteProduct(id);
-            toast.success('Ürün başarıyla silindi');
-            fetchData();
-        } catch (error) {
-            toast.error('Ürün silinirken bir hata oluştu');
         }
     };
 
@@ -321,6 +364,8 @@ const Admin = () => {
             </div>
         );
     }
+
+
 
     return (
         <div className="space-y-10 max-w-screen-xl mx-auto">
@@ -463,21 +508,29 @@ const Admin = () => {
                 <Route
                     path="/products"
                     element={
-                        <div className="space-y-6 mx-auto ">
+                        <div className="space-y-6 mx-auto">
+                            {/* Ürün Ekleme Formu */}
                             <div className="flex flex-col space-y-3 tracking-wide">
                                 {/* Ürün ismi ve fiyat yan yana */}
                                 <div className="flex space-x-2">
                                     <input
                                         type="text"
                                         value={newProduct.name}
-                                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                                        onChange={(e) =>
+                                            setNewProduct({ ...newProduct, name: e.target.value })
+                                        }
                                         placeholder="Ürün ismi"
-                                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50 "
+                                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
                                     />
                                     <input
                                         type="number"
                                         value={newProduct.price}
-                                        onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                                        onChange={(e) =>
+                                            setNewProduct({
+                                                ...newProduct,
+                                                price: parseFloat(e.target.value),
+                                            })
+                                        }
                                         placeholder="Fiyat"
                                         className="w-40 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
                                     />
@@ -486,14 +539,23 @@ const Admin = () => {
                                 {/* Fotoğraf Yükleme ve Kaldır Butonu */}
                                 <div className="flex items-center space-x-3">
                                     <label className="flex-1 flex items-center justify-center p-2 border border-gray-300 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200 transition-all">
-                                        <input type="file" accept=".png, .jpeg, .jpg" onChange={handleFileChange} className="hidden" />
+                                        <input
+                                            type="file"
+                                            accept=".png, .jpeg, .jpg"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
                                         {newProduct.imageFile ? (
                                             <div className="flex items-center gap-2 text-green-600">
                                                 <CheckCircle size={20} />
-                                                <span className="truncate max-w-[150px] text-sm">{newProduct.imageFile.name}</span>
+                                                <span className="truncate max-w-[150px] text-sm">
+                                                    {newProduct.imageFile.name}
+                                                </span>
                                             </div>
                                         ) : (
-                                            <span className="text-gray-600">Ürün Fotoğrafı Yükle (.jpeg .jpg .png)</span>
+                                            <span className="text-gray-600">
+                                                Ürün Fotoğrafı Yükle (.jpeg .jpg .png)
+                                            </span>
                                         )}
                                     </label>
                                     {newProduct.imageFile && (
@@ -509,7 +571,12 @@ const Admin = () => {
                                 {/* Kategori Seçme */}
                                 <select
                                     value={newProduct.categoryId}
-                                    onChange={(e) => setNewProduct({ ...newProduct, categoryId: parseInt(e.target.value) })}
+                                    onChange={(e) =>
+                                        setNewProduct({
+                                            ...newProduct,
+                                            categoryId: parseInt(e.target.value),
+                                        })
+                                    }
                                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
                                 >
                                     <option value={0}>Kategori seç</option>
@@ -523,7 +590,9 @@ const Admin = () => {
                                 {/* Ürün Açıklaması */}
                                 <textarea
                                     value={newProduct.description}
-                                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                                    onChange={(e) =>
+                                        setNewProduct({ ...newProduct, description: e.target.value })
+                                    }
                                     placeholder="Ürün açıklaması"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-neutral-600 outline-none bg-neutral-50"
                                     rows={3}
@@ -533,7 +602,9 @@ const Admin = () => {
                                 <textarea
                                     value={newProduct.ingredients.join(', ')}
                                     onChange={(e) => {
-                                        const ingredients = e.target.value.split(',').map((ingredient) => ingredient.trim());
+                                        const ingredients = e.target.value
+                                            .split(',')
+                                            .map((ingredient) => ingredient.trim());
                                         setNewProduct({ ...newProduct, ingredients });
                                     }}
                                     placeholder="İçindekiler (Virgülle ayırın)"
@@ -550,104 +621,131 @@ const Admin = () => {
                                 </button>
                             </div>
 
-
-
+                            {/* Kategori Butonları */}
                             <div className="space-y-8">
-    {categories.map((category) => {
-        const filteredProducts = products.filter((product) => product.category?.id === category.id);
+                                <div className="sticky top-0 py-4 z-10 mt-10 overflow-x-auto flex gap-2 whitespace-nowrap scrollbar-hide bg-secondaryWhite">
+                                    <button
+                                        onClick={() => setSelectedCategory(null)}
+                                        className={`px-4 py-2 rounded-full font-light tracking-wide border border-neutral-300 transition-all ${!selectedCategory
+                                            ? 'bg-neutral-900 text-neutral-200'
+                                            : 'text-neutral-500'
+                                            }`}
+                                    >
+                                        Tüm Ürünler
+                                    </button>
+                                    {categories.map((category) => {
+                                        const Icon = getCategoryIcon(category.name);
+                                        return (
+                                            <button
+                                                key={category.id}
+                                                onClick={() => handleCategoryChange(category.name)}
+                                                className={`flex items-center capitalize gap-2 px-4 py-2 rounded-full border border-neutral-300 font-light tracking-wide transition-all ${selectedCategory === category.name
+                                                    ? 'bg-neutral-900 text-neutral-200'
+                                                    : 'text-neutral-500'
+                                                    }`}
+                                            >
+                                                <Icon className="h-5 w-5" />
+                                                <span className="whitespace-nowrap">{category.name}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
 
-        return filteredProducts.length > 0 ? (
-            <div key={category.id}>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">{category.name}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProducts.map((product) => (
-                        <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-                            <img
-                                src={product.imageUrl.startsWith('http') ? product.imageUrl : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=300&fit=crop'}
-                                alt={product.name}
-                                className="w-full h-48 object-cover"
-                            />
-                            <div className="p-4">
-                                {editingProduct?.id === product.id ? (
-                                    <div className="space-y-2">
-                                        <input
-                                            type="text"
-                                            value={editingProduct.name}
-                                            onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                        />
-                                        <input
-                                            type="number"
-                                            value={editingProduct.price}
-                                            onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                        />
-                                        <textarea
-                                            value={editingProduct.description}
-                                            onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                        />
-                                        <textarea
-                                            value={editingProduct.ingredients.join(', ')}
-                                            onChange={(e) => {
-                                                const ingredients = e.target.value.split(',').map(ingredient => ingredient.trim());
-                                                setEditingProduct({ ...editingProduct, ingredients });
-                                            }}
-                                            placeholder="İçindekiler (Virgülle ayırın)"
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                        />
-                                        <button
-                                            onClick={() => handleUpdateProduct(product.id)}
-                                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
-                                        >
-                                            Kaydet
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                                        <p className="text-gray-600 mt-1">{product.description}</p>
-                                        <div className="mt-4">
-                                            <h4 className="text-sm font-semibold text-gray-800">İçindekiler:</h4>
-                                            <ul className="text-sm text-gray-600">
-                                                {product.ingredients?.map((ingredient, index) => (
-                                                    <li key={index}>{ingredient}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                        <div className="mt-4 flex justify-between items-center">
-                                            <span className="text-amber-600 font-bold">
-                                                ₺{product.price.toFixed(2)}
-                                            </span>
-                                            <div className="flex space-x-2">
-                                                <button
-                                                    onClick={() => setEditingProduct(product)}
-                                                    className="text-amber-600 hover:text-amber-700 transition-all"
-                                                >
-                                                    <Edit2 className="h-5 w-5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteProduct(product.id)}
-                                                    className="text-red-600 hover:text-red-700 transition-all"
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
+                                {/* Kategorilere Göre Filtrelenmiş Ürünler */}
+                                {categories.map((category) => {
+                                    const filteredProducts =
+                                        selectedCategory === null || selectedCategory === category.name
+                                            ? category.products
+                                            : [];
+                                    const deleteProduct = async (id: number) => {
+                                        if (!window.confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
+                                        try {
+                                            await api.deleteProduct(id);
+                                            toast.success('Ürün başarıyla silindi');
+                                            fetchData();
+                                        } catch (error) {
+                                            toast.error('Ürün silinirken bir hata oluştu');
+                                        }
+                                    };
+                                    return (
+                                        filteredProducts.length > 0 && (
+                                            <div key={category.id}>
+                                                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                                                    {category.name}
+                                                </h2>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {filteredProducts.map((product) => (
+                                                        <div
+                                                            key={product.id}
+                                                            className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    product.imageUrl.startsWith('http')
+                                                                        ? product.imageUrl
+                                                                        : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=300&fit=crop'
+                                                                }
+                                                                alt={product.name}
+                                                                className="w-full h-48 object-cover"
+                                                            />
+                                                            <div className="p-4">
+                                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                                    {product.name}
+                                                                </h3>
+                                                                <p className="text-gray-600 mt-1">
+                                                                    {product.description}
+                                                                </p>
+                                                                <div className="mt-4">
+                                                                    <h4 className="text-sm font-semibold text-gray-800">
+                                                                        İçindekiler:
+                                                                    </h4>
+                                                                    <ul className="text-sm text-gray-600">
+                                                                        {product.ingredients?.map((ingredient, index) => (
+                                                                            <li key={index}>{ingredient}</li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                                <div className="mt-4 flex justify-between items-center">
+                                                                    <span className="text-amber-600 font-bold">
+                                                                        ₺{product.price.toFixed(2)}
+                                                                    </span>
+                                                                    <div className="flex space-x-2">
+                                                                        <button
+                                                                            onClick={() => setEditingProduct(product)}
+                                                                            className="text-amber-600 hover:text-amber-700 transition-all"
+                                                                        >
+                                                                            <Edit2 className="h-5 w-5" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => deleteProduct(product.id)}
+                                                                            className="text-red-600 hover:text-red-700 transition-all"
+                                                                        >
+                                                                            <Trash2 className="h-5 w-5" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
-                                )}
+                                        )
+                                    );
+                                })}
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        ) : null;
-    })}
-</div>
 
+                            {/* Ürün Güncelleme Modal'ı (Tek bir kez, sayfa genelinde) */}
+                            {editingProduct && (
+                                <ProductUpdateModal
+                                    product={editingProduct}
+                                    onClose={() => setEditingProduct(null)}
+                                    onUpdate={handleUpdateProduct}
+                                />
+                            )}
                         </div>
                     }
                 />
+
 
                 <Route
                     path="/logos"
