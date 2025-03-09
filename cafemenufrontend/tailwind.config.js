@@ -10,7 +10,7 @@ export default {
         secondaryBlack:'#262626',
         primaryMain:'#004d99',
         secondaryMain:'#0080ff',
-        mainColor:'#ff0000',
+        mainColor:'#0f520f',
         
 
       },
