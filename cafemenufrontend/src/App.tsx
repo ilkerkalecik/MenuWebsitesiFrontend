@@ -5,6 +5,7 @@ import Admin from './pages/Admin.tsx';
 import Sidebar from './components/Sidebar.tsx'; // Sidebar bileşeni
 import Login from './pages/Login.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
+import AnaSayfa from './pages/AnaSayfa.tsx';
 
 function App() {
   return (
@@ -14,10 +15,13 @@ function App() {
         <Sidebar />
 
         {/* İçerik Alanı */}
-        <div className="flex-1 container mx-auto px-4 py-8">
+        <div className="flex-1 container mx-auto ">
           <Routes>
             {/* Müşteriler için ana sayfa; auth gerekmiyor */}
-            <Route path="/" element={<Menu />} />
+            
+            <Route path="/" element={<AnaSayfa />} />
+
+            <Route path="/menu" element={<Menu />} />
 
             {/* Login sayfası */}
             <Route path="/login" element={<Login />} />

@@ -94,7 +94,7 @@ const Menu = () => {
     return (
         <div className="space-y-12">
             {/* Kategori Seçim Butonları */}
-            <div className="sticky top-0  py-4 z-10 mt-10 overflow-x-auto flex gap-2 whitespace-nowrap  scrollbar-hide  bg-secondaryWhite">
+            <div className="sticky top-0   py-4 z-10 mt-14 overflow-x-auto flex gap-2 whitespace-nowrap  scrollbar-hide  bg-secondaryWhite">
                 <button
                     onClick={() => setSelectedCategory(null)}
                     className={`px-4 py-2 rounded-full font-light tracking-wide border border-neutral-300 transition-all ${!selectedCategory ? 'bg-neutral-900 text-neutral-200' : 'text-neutral-500 '}`}

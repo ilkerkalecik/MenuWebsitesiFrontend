@@ -31,7 +31,7 @@ const Login = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+      <div className="bg-neutral-50 p-6 rounded shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center mb-6">Admin Girişi</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -62,7 +62,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-orange-600 text-white rounded hover:bg-orange-700 focus:outline-none"
+            className="w-full py-2 px-4 bg-neutral-900 text-white rounded  focus:outline-none"
           >
             Giriş Yap
           </button>

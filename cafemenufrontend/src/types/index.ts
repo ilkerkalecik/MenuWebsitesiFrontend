@@ -35,3 +35,8 @@ export interface Logo {
     id: number;
     logoUrl: string;
 }
+// types.ts
+export interface Carousel {
+    id: number;
+    imageUrl: string;
+  }

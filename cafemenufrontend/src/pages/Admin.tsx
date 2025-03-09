@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Category, Product, Logo, CreateProductDto } from '../types';
+import { Category, Product, Logo, CreateProductDto, Carousel } from '../types';
 import { api } from '../api';
 import { PlusCircle, Edit2, Trash2, GripVertical, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,7 +11,7 @@ import ProductUpdateModal from './ProductUptadeModal';
 
 
 
-const Admin = () => {
+const Admin = () => {   
     const [categories, setCategories] = useState<Category[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [logos, setLogos] = useState<Logo[]>([]);
@@ -78,11 +78,13 @@ const Admin = () => {
     };
     const navigate = useNavigate();
     const location = useLocation();
-    const activeTab = location.pathname.includes('products')
+    const activeTab: 'products' | 'logos' | 'categories' | 'carousels' = location.pathname.includes('products')
         ? 'products'
         : location.pathname.includes('logos')
             ? 'logos'
-            : 'categories';
+            : location.pathname.includes('carousels')
+                ? 'carousels'
+                : 'categories';
 
     useEffect(() => {
         fetchData();
@@ -212,6 +214,17 @@ const Admin = () => {
         }
     };
 
+    const deleteProduct = async (id: number) => {
+        if (!window.confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
+        try {
+            await api.deleteProduct(id);
+            toast.success('Ürün başarıyla silindi');
+            fetchData();
+        } catch (error) {
+            toast.error('Ürün silinirken bir hata oluştu');
+        }
+    };
+
     const handleAddProduct = async () => {
         let imageUrl = '';
 
@@ -259,31 +272,12 @@ const Admin = () => {
     const handleUpdateProduct = async (updatedProduct: CreateProductDto) => {
         if (!editingProduct) return;
 
-        let imageUrl = editingProduct.imageUrl;
-
-        // Eğer yeni bir resim seçildiyse, onu sunucuya yükle
-        if (editingImageFile) {
-            try {
-                const formData = new FormData();
-                formData.append('file', editingImageFile);
-                const uploadRes = await api.uploadImage(formData);
-                imageUrl = uploadRes.data.url;
-            } catch (error) {
-                toast.error('Fotoğraf yüklenirken bir hata oluştu');
-                return;
-            }
-        }
-
         try {
-            // API'ye güncellenmiş ürün bilgilerini gönder
-            await api.updateProduct(editingProduct.id, {
-                ...updatedProduct,
-                imageUrl, // Yeni resim URL'sini ekle
-            });
+            // Direkt updatedProduct.imageUrl'yi kullanın (zaten yüklenmiş URL içeriyor)
+            await api.updateProduct(editingProduct.id, updatedProduct);
             toast.success('Ürün başarıyla güncellendi');
-            fetchData(); // Ürün listesini yeniden çek
-            setEditingProduct(null); // Modal'ı kapat
-            setEditingImageFile(null); // Resim dosyasını temizle
+            fetchData();
+            setEditingProduct(null);
         } catch (error) {
             toast.error('Ürün güncellenirken bir hata oluştu');
         }
@@ -368,45 +362,49 @@ const Admin = () => {
 
 
     return (
-        <div className="space-y-10 max-w-screen-xl mx-auto">
+        <div className="space-y-10 max-w-screen-xl mx-auto container p-2 overflow-hidden">
             <div className="flex justify-end">
                 <button
                     onClick={handleLogout}
-                    className="bg-neutral-800 text-neutral-100 px-4 py-2 rounded hover:shadow-lg font-light tracking-wider "
+                    className="bg-neutral-900 text-sm font-extralight text-neutral-200 px-4 py-3 mt-2 rounded hover:shadow-lg  tracking-wider "
                 >
                     Çıkış Yap
                 </button>
             </div>
 
-            <div className="flex space-x-4   tracking-wider">
-                <Link
-                    to="/admin"
-                    className={`pb-2 px-4 ${activeTab === 'categories'
-                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
-                        : 'text-neutral-600'
-                        }`}
-                >
-                    Kategoriler
-                </Link>
-                <Link
-                    to="/admin/products"
-                    className={`pb-2 px-4 ${activeTab === 'products'
-                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
-                        : 'text-neutral-600'
-                        }`}
-                >
-                    Ürünler
-                </Link>
-                <Link
-                    to="/admin/logos"
-                    className={`pb-2 px-4 ${activeTab === 'logos'
-                        ? 'border-b-2 border-neutral-950 text-neutral-950-600'
-                        : 'text-neutral-600'
-                        }`}
-                >
-                    Logo
-                </Link>
+            <div className="overflow-x-auto whitespace-nowrap px-4 pb-2 scrollbar-hide">
+                <div className="flex space-x-6 tracking-wider">
+                    <Link
+                        to="/admin"
+                        className={`pb-2 px-4 ${activeTab === 'categories'
+                            ? 'border-b-2 border-neutral-950 text-neutral-950'
+                            : 'text-neutral-600'
+                            }`}
+                    >
+                        Kategoriler
+                    </Link>
+                    <Link
+                        to="/admin/products"
+                        className={`pb-2 px-4 ${activeTab === 'products'
+                            ? 'border-b-2 border-neutral-950 text-neutral-950'
+                            : 'text-neutral-600'
+                            }`}
+                    >
+                        Ürünler
+                    </Link>
+                    <Link
+                        to="/admin/logos"
+                        className={`pb-2 px-4 ${activeTab === 'logos'
+                            ? 'border-b-2 border-neutral-950 text-neutral-950'
+                            : 'text-neutral-600'
+                            }`}
+                    >
+                        Logo
+                    </Link>
+                   
+                </div>
             </div>
+
 
             <Routes>
                 <Route
@@ -508,7 +506,7 @@ const Admin = () => {
                 <Route
                     path="/products"
                     element={
-                        <div className="space-y-6 mx-auto">
+                        <div className="space-y-6 mx-auto text-sm ">
                             {/* Ürün Ekleme Formu */}
                             <div className="flex flex-col space-y-3 tracking-wide">
                                 {/* Ürün ismi ve fiyat yan yana */}
@@ -561,7 +559,7 @@ const Admin = () => {
                                     {newProduct.imageFile && (
                                         <button
                                             onClick={removeFile}
-                                            className="flex items-center gap-1 text-white text-sm hover:bg-neutral-900 transition-all bg-neutral-800 p-3 rounded-lg"
+                                            className="flex items-center gap-1 text-white text-xs tracking-wider font-thin hover:bg-neutral-950 transition-all bg-neutral-900 p-3  rounded-lg"
                                         >
                                             <XCircle size={16} /> Kaldır
                                         </button>
@@ -615,7 +613,7 @@ const Admin = () => {
                                 {/* Ürünü Ekle Butonu */}
                                 <button
                                     onClick={handleAddProduct}
-                                    className="w-full bg-neutral-800 text-white px-6 py-3 rounded-lg transition-all"
+                                    className="w-full bg-neutral-900 text-neutral-100 font-thin tracking-wider px-6 py-3 rounded-lg transition-all"
                                 >
                                     Ürünü Ekle
                                 </button>
@@ -657,72 +655,43 @@ const Admin = () => {
                                         selectedCategory === null || selectedCategory === category.name
                                             ? category.products
                                             : [];
-                                    const deleteProduct = async (id: number) => {
-                                        if (!window.confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
-                                        try {
-                                            await api.deleteProduct(id);
-                                            toast.success('Ürün başarıyla silindi');
-                                            fetchData();
-                                        } catch (error) {
-                                            toast.error('Ürün silinirken bir hata oluştu');
-                                        }
-                                    };
+
+
                                     return (
                                         filteredProducts.length > 0 && (
                                             <div key={category.id}>
                                                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                                                     {category.name}
                                                 </h2>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3">
                                                     {filteredProducts.map((product) => (
                                                         <div
                                                             key={product.id}
-                                                            className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
+                                                            className="bg-neutral-50 rounded overflow-hidden border border-neutral-300"
                                                         >
-                                                            <img
-                                                                src={
-                                                                    product.imageUrl.startsWith('http')
-                                                                        ? product.imageUrl
-                                                                        : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=300&fit=crop'
-                                                                }
-                                                                alt={product.name}
-                                                                className="w-full h-48 object-cover"
-                                                            />
-                                                            <div className="p-4">
-                                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                                    {product.name}
-                                                                </h3>
-                                                                <p className="text-gray-600 mt-1">
-                                                                    {product.description}
-                                                                </p>
-                                                                <div className="mt-4">
-                                                                    <h4 className="text-sm font-semibold text-gray-800">
-                                                                        İçindekiler:
-                                                                    </h4>
-                                                                    <ul className="text-sm text-gray-600">
-                                                                        {product.ingredients?.map((ingredient, index) => (
-                                                                            <li key={index}>{ingredient}</li>
-                                                                        ))}
-                                                                    </ul>
+                                                            <div className="p-4 flex items-center justify-center space-x-4">
+                                                                <div className="flex flex-row items-center space-x-4 w-full">
+                                                                    <h1 className="font-extralight text-xs tracking-wider">
+                                                                        {product.name}
+                                                                    </h1>
+                                                                    <div className="flex-grow border-dotted border-t border-neutral-400"></div>
+                                                                    <p className="font-bold text-neutral-950 text-xs">
+                                                                        {product.price.toFixed(2)} ₺
+                                                                    </p>
                                                                 </div>
-                                                                <div className="mt-4 flex justify-between items-center">
-                                                                    <span className="text-amber-600 font-bold">
-                                                                        ₺{product.price.toFixed(2)}
-                                                                    </span>
-                                                                    <div className="flex space-x-2">
-                                                                        <button
-                                                                            onClick={() => setEditingProduct(product)}
-                                                                            className="text-amber-600 hover:text-amber-700 transition-all"
-                                                                        >
-                                                                            <Edit2 className="h-5 w-5" />
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => deleteProduct(product.id)}
-                                                                            className="text-red-600 hover:text-red-700 transition-all"
-                                                                        >
-                                                                            <Trash2 className="h-5 w-5" />
-                                                                        </button>
-                                                                    </div>
+                                                                <div className="flex space-x-2 items-center justify-center">
+                                                                    <button
+                                                                        onClick={() => setEditingProduct(product)}
+                                                                        className="text-neutral-900 transition-all"
+                                                                    >
+                                                                        <Edit2 className="h-5 w-5" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => deleteProduct(product.id)}
+                                                                        className="text-red-600 hover:text-red-700 transition-all"
+                                                                    >
+                                                                        <Trash2 className="h-5 w-5" />
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -731,6 +700,7 @@ const Admin = () => {
                                             </div>
                                         )
                                     );
+
                                 })}
                             </div>
 
@@ -768,7 +738,7 @@ const Admin = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-lg shadow-md overflow-hidden p-4">
+                                <div className="bg-neutral-50 rounded border   overflow-hidden p-4">
                                     <img
                                         src={
                                             logos[0].logoUrl.startsWith('http')
@@ -787,39 +757,46 @@ const Admin = () => {
                                                     onChange={handleEditingLogoFileChange}
                                                     className="p-2 border rounded"
                                                 />
-                                                <button
-                                                    onClick={() => handleUpdateLogo(logos[0].id)}
-                                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                                >
-                                                    Kaydet
-                                                </button>
-                                                <button
-                                                    onClick={() => setEditingLogo(null)}
-                                                    className="text-gray-600 hover:text-gray-800"
-                                                >
-                                                    Vazgeç
-                                                </button>
+                                                <div className='flex space-x-4 items-center justify-center'>
+
+                                                    <button
+                                                        onClick={() => setEditingLogo(null)}
+                                                        className="text-gray-600 hover:text-gray-800 border px-4 py-2 border-neutral-800 rounded"
+                                                    >
+                                                        Vazgeç
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUpdateLogo(logos[0].id)}
+                                                        className="bg-neutral-800 text-neutral-100 px-4 py-2 rounded hover:shadow-2xl"
+                                                    >
+                                                        Kaydet
+                                                    </button>
+                                                </div>
+
                                             </>
                                         ) : (
                                             <>
-                                                <button
-                                                    onClick={() =>
-                                                        setEditingLogo({
-                                                            id: logos[0].id,
-                                                            logoUrl: logos[0].logoUrl,
-                                                            imageFile: null,
-                                                        })
-                                                    }
-                                                    className="text-amber-600 hover:text-amber-700"
-                                                >
-                                                    <Edit2 className="h-5 w-5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteLogo(logos[0].id)}
-                                                    className="text-red-600 hover:text-red-700"
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
+                                                <div className='flex space-x-5'>
+                                                    <button
+                                                        onClick={() =>
+                                                            setEditingLogo({
+                                                                id: logos[0].id,
+                                                                logoUrl: logos[0].logoUrl,
+                                                                imageFile: null,
+                                                            })
+                                                        }
+                                                        className="text-neutral-800 "
+                                                    >
+                                                        <Edit2 className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteLogo(logos[0].id)}
+                                                        className="text-red-600 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
+
+                                                </div>
                                             </>
                                         )}
                                     </div>
@@ -828,6 +805,8 @@ const Admin = () => {
                         </div>
                     }
                 />
+               
+
             </Routes>
         </div>
     );
