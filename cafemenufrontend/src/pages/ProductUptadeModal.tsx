@@ -80,7 +80,7 @@ const ProductUpdateModal = ({ product, onClose, onUpdate }: ProductUpdateModalPr
         </button>
 
         {/* Modal Başlık */}
-        <h2 className="text-2xl font-semibold tracking-wide text-neutral-700 mt-4">Ürün Güncelle</h2>
+        <h2 className="text-2xl font-semibold tracking-wide text-mainColor mt-4">Ürün Güncelle</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3 text-sm font-light">
           {/* Ürün İsmi */}
@@ -145,13 +145,13 @@ const ProductUpdateModal = ({ product, onClose, onUpdate }: ProductUpdateModalPr
             <button
               type="button"
               onClick={onClose}
-              className="border text-neutral-900 border-neutral-900 px-4 py-2 rounded-lg"
+              className="border text-mainColor border-neutral-900 px-4 py-2 rounded-lg"
             >
               İptal
             </button>
             <button
               type="submit"
-              className="bg-neutral-800 text-white px-4 py-2 rounded-lg hover:shadow-2xl"
+              className="bg-mainColor text-white px-4 py-2 rounded-lg hover:shadow-2xl"
             >
               Kaydet
             </button>

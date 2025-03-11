@@ -10,32 +10,30 @@ import AnaSayfa from './pages/AnaSayfa.tsx';
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen bg-secondaryWhite font-lato">
-        {/* Sidebar */}
-        <Sidebar />
+    <div className="flex min-h-screen bg-secondaryWhite font-lato">
+      {/* Sidebar */}
+      <Sidebar />
 
-        {/* İçerik Alanı */}
-        <div className="flex-1 container mx-auto ">
-          <Routes>
-            {/* Müşteriler için ana sayfa; auth gerekmiyor */}
-            
-            <Route path="/" element={<AnaSayfa />} />
+      {/* İçerik Alanı */}
+      <Routes>
+        {/* AnaSayfa'yı container dışında render et */}
+        <Route path="/" element={<AnaSayfa />} />
+      </Routes>
 
-            <Route path="/menu" element={<Menu />} />
-
-            {/* Login sayfası */}
-            <Route path="/login" element={<Login />} />
-
-            {/* Admin panelini korumak için ProtectedRoute kullanıyoruz */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/admin/*" element={<Admin />} />
-            </Route>
-          </Routes>
-        </div>
-
-        <Toaster position="bottom-right" />
+      {/* Diğer sayfalar container içinde kalır */}
+      <div className="flex-1 container mx-auto">
+        <Routes>
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin/*" element={<Admin />} />
+          </Route>
+        </Routes>
       </div>
-    </BrowserRouter>
+
+      <Toaster position="bottom-right" />
+    </div>
+  </BrowserRouter>
   );
 }
 

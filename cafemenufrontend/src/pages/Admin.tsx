@@ -366,19 +366,19 @@ const Admin = () => {
             <div className="flex justify-end">
                 <button
                     onClick={handleLogout}
-                    className="bg-neutral-900 text-sm font-extralight text-neutral-200 px-4 py-3 mt-2 rounded hover:shadow-lg  tracking-wider "
+                    className="bg-mainColor text-sm  text-neutral-50 px-4 py-3 mt-2 rounded hover:shadow-lg  tracking-wider "
                 >
                     Çıkış Yap
                 </button>
             </div>
 
             <div className="overflow-x-auto whitespace-nowrap px-4 pb-2 scrollbar-hide">
-                <div className="flex space-x-6 tracking-wider">
+                <div className="flex space-x-6 tracking-wider ">
                     <Link
                         to="/admin"
                         className={`pb-2 px-4 ${activeTab === 'categories'
-                            ? 'border-b-2 border-neutral-950 text-neutral-950'
-                            : 'text-neutral-600'
+                            ? 'border-b-2 border-mainColor text-mainColor'
+                            : 'text-neutral-900'
                             }`}
                     >
                         Kategoriler
@@ -386,7 +386,7 @@ const Admin = () => {
                     <Link
                         to="/admin/products"
                         className={`pb-2 px-4 ${activeTab === 'products'
-                            ? 'border-b-2 border-neutral-950 text-neutral-950'
+                            ? 'border-b-2 border-mainColor text-mainColor'
                             : 'text-neutral-600'
                             }`}
                     >
@@ -395,7 +395,7 @@ const Admin = () => {
                     <Link
                         to="/admin/logos"
                         className={`pb-2 px-4 ${activeTab === 'logos'
-                            ? 'border-b-2 border-neutral-950 text-neutral-950'
+                            ? 'border-b-2 border-mainColor text-mainColor'
                             : 'text-neutral-600'
                             }`}
                     >
@@ -422,7 +422,7 @@ const Admin = () => {
 
                                 <button
                                     onClick={handleAddCategory}
-                                    className="bg-neutral-800 text-white px-4 py-2 rounded hover:shadow-2xl border-neutral-900"
+                                    className="bg-mainColor text-white px-4 py-2 rounded hover:shadow-2xl "
                                 >
                                     <PlusCircle className="h-5 w-5 m-0.5" />
                                 </button>
@@ -479,7 +479,7 @@ const Admin = () => {
                                                                 ) : (
                                                                     <button
                                                                         onClick={() => setEditingCategory(category)}
-                                                                        className="text-neutral-700-600 hover:shadow-2xl"
+                                                                        className="text-mainColor hover:shadow-2xl"
                                                                     >
                                                                         <Edit2 className="h-5 w-5" />
                                                                     </button>
@@ -559,7 +559,7 @@ const Admin = () => {
                                     {newProduct.imageFile && (
                                         <button
                                             onClick={removeFile}
-                                            className="flex items-center gap-1 text-white text-xs tracking-wider font-thin hover:bg-neutral-950 transition-all bg-neutral-900 p-3  rounded-lg"
+                                            className="flex items-center gap-1 text-white text-xs tracking-wider font-thin  transition-all bg-mainColor p-3  rounded-lg"
                                         >
                                             <XCircle size={16} /> Kaldır
                                         </button>
@@ -613,7 +613,7 @@ const Admin = () => {
                                 {/* Ürünü Ekle Butonu */}
                                 <button
                                     onClick={handleAddProduct}
-                                    className="w-full bg-neutral-900 text-neutral-100 font-thin tracking-wider px-6 py-3 rounded-lg transition-all"
+                                    className="w-full bg-mainColor text-neutral-50 tracking-wider px-6 py-3 rounded-lg transition-all"
                                 >
                                     Ürünü Ekle
                                 </button>
@@ -624,8 +624,8 @@ const Admin = () => {
                                 <div className="sticky top-0 py-4 z-10 mt-10 overflow-x-auto flex gap-2 whitespace-nowrap scrollbar-hide bg-secondaryWhite">
                                     <button
                                         onClick={() => setSelectedCategory(null)}
-                                        className={`px-4 py-2 rounded-full font-light tracking-wide border border-neutral-300 transition-all ${!selectedCategory
-                                            ? 'bg-neutral-900 text-neutral-200'
+                                        className={`px-4 py-2 rounded-full  tracking-wide border border-neutral-300 transition-all ${!selectedCategory
+                                            ? 'bg-mainColor text-neutral-200'
                                             : 'text-neutral-500'
                                             }`}
                                     >
@@ -637,8 +637,8 @@ const Admin = () => {
                                             <button
                                                 key={category.id}
                                                 onClick={() => handleCategoryChange(category.name)}
-                                                className={`flex items-center capitalize gap-2 px-4 py-2 rounded-full border border-neutral-300 font-light tracking-wide transition-all ${selectedCategory === category.name
-                                                    ? 'bg-neutral-900 text-neutral-200'
+                                                className={`flex items-center capitalize gap-2 px-4 py-2 rounded-full border border-neutral-300  tracking-wide transition-all ${selectedCategory === category.name
+                                                    ? 'bg-mainColor text-neutral-200'
                                                     : 'text-neutral-500'
                                                     }`}
                                             >
@@ -660,7 +660,7 @@ const Admin = () => {
                                     return (
                                         filteredProducts.length > 0 && (
                                             <div key={category.id}>
-                                                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                                                <h2 className="text-xl font-semibold text-mainColor mb-4">
                                                     {category.name}
                                                 </h2>
                                                 <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3">
@@ -671,18 +671,18 @@ const Admin = () => {
                                                         >
                                                             <div className="p-4 flex items-center justify-center space-x-4">
                                                                 <div className="flex flex-row items-center space-x-4 w-full">
-                                                                    <h1 className="font-extralight text-xs tracking-wider">
+                                                                    <h1 className="text-mainColor text-xs font-semibold tracking-wider">
                                                                         {product.name}
                                                                     </h1>
                                                                     <div className="flex-grow border-dotted border-t border-neutral-400"></div>
-                                                                    <p className="font-bold text-neutral-950 text-xs">
+                                                                    <p className="font-bold text-mainColor text-xs">
                                                                         {product.price.toFixed(2)} ₺
                                                                     </p>
                                                                 </div>
                                                                 <div className="flex space-x-2 items-center justify-center">
                                                                     <button
                                                                         onClick={() => setEditingProduct(product)}
-                                                                        className="text-neutral-900 transition-all"
+                                                                        className="text-mainColor transition-all"
                                                                     >
                                                                         <Edit2 className="h-5 w-5" />
                                                                     </button>
@@ -731,7 +731,7 @@ const Admin = () => {
                                     />
                                     <button
                                         onClick={handleAddLogo}
-                                        className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center space-x-2"
+                                        className="bg-mainColor text-white px-4 py-2 rounded  flex items-center space-x-2"
                                     >
                                         <PlusCircle className="h-5 w-5" />
                                         <span>Logo Ekle</span>
@@ -761,13 +761,13 @@ const Admin = () => {
 
                                                     <button
                                                         onClick={() => setEditingLogo(null)}
-                                                        className="text-gray-600 hover:text-gray-800 border px-4 py-2 border-neutral-800 rounded"
+                                                        className="text-mainColor hover:text-gray-800 border px-4 py-2 border-mainColor rounded"
                                                     >
                                                         Vazgeç
                                                     </button>
                                                     <button
                                                         onClick={() => handleUpdateLogo(logos[0].id)}
-                                                        className="bg-neutral-800 text-neutral-100 px-4 py-2 rounded hover:shadow-2xl"
+                                                        className="bg-mainColor text-neutral-100 px-4 py-2 rounded hover:shadow-2xl"
                                                     >
                                                         Kaydet
                                                     </button>
@@ -785,7 +785,7 @@ const Admin = () => {
                                                                 imageFile: null,
                                                             })
                                                         }
-                                                        className="text-neutral-800 "
+                                                        className="text-mainColor hover:shadow-2xl"
                                                     >
                                                         <Edit2 className="h-5 w-5" />
                                                     </button>

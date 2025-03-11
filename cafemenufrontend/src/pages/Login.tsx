@@ -62,7 +62,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-neutral-900 text-white rounded  focus:outline-none"
+            className="w-full py-2 px-4 bg-mainColor text-white rounded  focus:outline-none"
           >
             Giriş Yap
           </button>
