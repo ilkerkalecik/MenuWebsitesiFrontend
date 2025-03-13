@@ -417,7 +417,7 @@ const Admin = () => {
                                     value={newCategoryName}
                                     onChange={(e) => setNewCategoryName(e.target.value)}
                                     placeholder="Yeni kategori ismi giriniz"
-                                    className="flex-1 p-2 border border-neutral-300 rounded tracking-wide  focus:border-neutral-900 outline-none bg-neutral-50"
+                                    className="flex-1 p-2 border border-neutral- rounded tracking-wide   focus:border-neutral-900 outline-none bg-neutral-50"
                                 />
 
                                 <button

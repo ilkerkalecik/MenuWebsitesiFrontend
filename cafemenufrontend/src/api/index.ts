@@ -57,6 +57,10 @@ export const api = {
         return response.data;
     },
 
+
+
+
+
     // Kategori sırası güncelleme
     updateCategoryOrder: (categories: { id: number; order: number }[]) =>
         axios.put(`${API_URL}/category/order`, { categories: categories }),
@@ -65,5 +69,6 @@ export const api = {
     addLogo: (logoUrl: string) => axios.post(`${API_URL}/logo`, { logoUrl }),
     updateLogo: (id: number, logoUrl: string) => axios.put(`${API_URL}/logo/${id}`, { logoUrl }),
     deleteLogo: (id: number) => axios.delete(`${API_URL}/logo/${id}`),
-   
+
+
 };

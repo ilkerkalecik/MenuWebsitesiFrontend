@@ -40,3 +40,9 @@ export interface Carousel {
     id: number;
     imageUrl: string;
   }
+
+
+export interface User{
+
+    
+}
