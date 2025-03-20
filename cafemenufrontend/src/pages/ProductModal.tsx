@@ -31,7 +31,7 @@ const ProductModal = ({ product, closeModal }: { product: any, closeModal: () =>
                     <img
                         src={product.imageUrl}
                         alt={product.name}
-                        className=" h-64 border border-neutral-200 rounded-md"
+                        className=" max-h-72 border border-neutral-200 rounded-md"
                     />
                 </div>
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Category, Product, CreateProductDto, Carousel } from '../types';
+import { Category, Product, CreateProductDto } from '../types';
 
 const API_URL = "http://localhost:8080/api";  //http://www.ilkerkalecikmenu.shop:8080/api
 
@@ -11,7 +11,7 @@ export const api = {
         if (response.status !== 200) {
             throw new Error('Login failed');
         }
-        return response.data.token;  // Backend'in döndürdüğü JSON { token: '...' } şeklinde olmalı.
+        return (response.data as { token: string }).token;  // Backend'in döndürdüğü JSON { token: '...' } şeklinde olmalı.
     },
 
     // Category endpoints

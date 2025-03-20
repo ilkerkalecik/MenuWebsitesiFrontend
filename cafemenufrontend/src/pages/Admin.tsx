@@ -99,7 +99,7 @@ const Admin = () => {
             ]);
             setCategories(categoriesRes.data.sort((a, b) => a.categoryOrder - b.categoryOrder));
             setProducts(productsRes.data);
-            setLogos(logosRes.data);
+            setLogos(logosRes.data as Logo[]);
         } catch (error) {
             toast.error('Veriler getirilirken bir hata oluştu');
         } finally {
@@ -233,7 +233,7 @@ const Admin = () => {
                 const formData = new FormData();
                 formData.append('file', newProduct.imageFile);
                 const uploadRes = await api.uploadImage(formData);
-                imageUrl = uploadRes.data.url;
+                imageUrl = (uploadRes.data as { url: string }).url;
             } catch (error) {
                 toast.error('Fotoğraf yüklenirken bir hata oluştu');
                 return;
@@ -291,7 +291,7 @@ const Admin = () => {
                 const formData = new FormData();
                 formData.append('file', newLogo.imageFile);
                 const uploadRes = await api.uploadImage(formData);
-                logoUrl = uploadRes.data.url;
+                logoUrl = (uploadRes.data as { url: string }).url;
             } catch (error) {
                 toast.error('Logo yüklenirken bir hata oluştu');
                 return;
@@ -318,7 +318,7 @@ const Admin = () => {
                 const formData = new FormData();
                 formData.append('file', editingLogo.imageFile);
                 const uploadRes = await api.uploadImage(formData);
-                logoUrl = uploadRes.data.url;
+                logoUrl = (uploadRes.data as { url: string }).url;
             } catch (error) {
                 toast.error('Logo güncellenirken hata oluştu');
                 return;
